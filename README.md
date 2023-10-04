@@ -1,6 +1,6 @@
 # freshForecast
 
-![freshForecast Logo](assets/logo.png)
+![freshForecast Logo](assets/logo.svg)
 
 An RNN and LSTM model based project, aimed at analyzing and forecasting the fruit and vegetable market prices in Kathmandu, Kalimati from 2013 to 2021.
 
