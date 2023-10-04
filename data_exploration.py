@@ -21,9 +21,9 @@ def visualize_trends(data, commodity):
     plt.show()
 
 if __name__ == "__main__":
-    file_path = "dataset.csv"  # Replace with your actual file path
+    file_path = "dataset.csv"  # our dataset path
     data = load_data(file_path)
     basic_statistics(data)
 
-    commodity = "Tomato Big(Nepali)"  # Replace with a commodity of your choice
+    commodity = "Tomato Big(Nepali)"  # using a commodity for exploration
     visualize_trends(data, commodity)
