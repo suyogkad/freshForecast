@@ -51,4 +51,4 @@ Users can leverage freshForecast to meticulously analyze the fruits and vegetabl
 
 ## License
 
-This project is open source and available under the [MIT License](LICENSE) (Note: You might need to add a LICENSE file).
+This project is open source and available under the [MIT License](LICENSE).
