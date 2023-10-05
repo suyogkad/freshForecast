@@ -8,7 +8,7 @@ freshForecast is an insightful deep learning project that casts light on the int
 ### Dataset
 
 This project utilizes an open-source dataset from Open Data Nepal, available at: [Kalimati Tarkari Dataset](https://opendatanepal.com/dataset/kalimati-tarkari-dataset)
-. The dataset is employed here strictly for educational and research purposes only.
+. The dataset is employed here strictly for educational and research purpose only.
 
 ## Getting Started
 
