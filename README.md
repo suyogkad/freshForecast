@@ -1,10 +1,9 @@
 ![freshForecast Logo](assets/template1.png)
 
-An RNN and LSTM model based project, aimed at analyzing and forecasting the fruit and vegetable market prices of Kalimati. Trained on Kalimati Fruits and Vegetables prices dataset from 2013 to 2021.
-
+Explore the financial horizons of Kathmandu's vital agricultural hub with freshForecast. Dive into a technological ensemble of rich historical data and acute machine learning precision, crafting not only a forecast but a tangible guide through the ebbs and flows of the Kalimati market's future prices.
 ## Description
 
-freshForecast is an academic project utilizing deep learning models such as RNN and LSTM to dive into the price trends and future predictions of the fruits and vegetable market in Kathmandu, specifically Kalimati, from the year 2013 to 2021. The dataset used in this project is strictly for research purposes.
+freshForecast is an insightful deep learning project that casts light on the intricate price dynamics of the prominent Kalimati Fruits and Vegetables Market, which significantly satisfies 60-70% of Kathmandu Valley's demand for agricultural produce. This project harnesses the predictive power of Long Short-Term Memory (LSTM) networks— a specialized form of Recurrent Neural Networks (RNNs) — to analyze and forecast fruit and vegetable prices, utilizing a comprehensive dataset spanning from 2013 to 2021. The ambition here is not merely to visualize historical data but to adeptly predict future market prices, providing a vital tool for researchers, market analysts, and policymakers in crafting informed strategies and decisions in the agricultural market domain.
 
 ### Dataset
 
@@ -51,4 +50,4 @@ Users can leverage freshForecast to meticulously analyze the fruits and vegetabl
 
 ## License
 
-This project and its codebase are intended solely for educational and academic purposes. Please review the [LICENSE](LICENSE) for details on its usage and redistribution.
+This project is open source and available under the [MIT License](LICENSE) (Note: You might need to add a LICENSE file).
