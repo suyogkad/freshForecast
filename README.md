@@ -51,4 +51,6 @@ Users can leverage freshForecast to meticulously analyze the fruits and vegetabl
 
 ## License
 
-This project is open source and available under the [MIT License](LICENSE).
+## License
+
+While the utilized dataset is open and accessible from [Open Data Nepal](https://opendatanepal.com/dataset/kalimati-tarkari-dataset), this project's codebase is not open source and is intended solely for educational and academic viewing. Usage, modification, or distribution of the code requires explicit permission from the author. View [LICENSE](https://github.com/suyogkad/freshForecast/blob/main/LICENSE) for more details.
