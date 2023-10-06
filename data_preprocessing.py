@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from sklearn.model_selection import train_test_split
 from joblib import dump, load
+import warnings  # Import warnings module
+
+# Suppress specific warning
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 def load_data(file_path):
@@ -47,21 +51,33 @@ def save_data(data, file_name):
     data.to_csv(os.path.join('processed_data', file_name), index=False)
 
 
-def data_preparation(data, target_col_name, n_past=60):
-    data = extract_date_features(data)
+def data_preparation(data, target_col_name, n_past=60, skip_feature_extraction_for=None):
+    if skip_feature_extraction_for is not None and data['Commodity'].iloc[0] in skip_feature_extraction_for:
+        print(f"Skipping feature extraction for {data['Commodity'].iloc[0]}")
+    else:
+        data = extract_date_features(data)
 
-    # Initialize the encoder even if 'Unit' is not in columns
     encoder = None
 
-    # Handling the 'Unit' column with one-hot encoding
     if 'Unit' in data.columns:
-        encoder = OneHotEncoder(drop='first', sparse=False)  # drop='first' to avoid multicollinearity
-        unit_encoded = encoder.fit_transform(data[['Unit']])
-        unit_df = pd.DataFrame(unit_encoded, columns=[f"Unit_{cat}" for cat in encoder.categories_[0][1:]])
+        encoder = OneHotEncoder(drop='first', sparse_output=True)  # Updated based on warning
+        unit_encoded = encoder.fit_transform(data[['Unit']]).toarray()  # Convert to dense array
 
-        # Concatenating the one-hot encoded unit columns with the original data
-        data = pd.concat([data, unit_df], axis=1)
-        data = data.drop(columns=['Unit'])  # dropping the original 'Unit' column
+        # Debugging: Check the shape and type
+        print(f"Shape of unit_encoded: {unit_encoded.shape}")
+        print(f"Type of unit_encoded: {type(unit_encoded)}")
+
+        if unit_encoded.shape[1] == 0:  # Check if there are no columns
+            print("Warning: unit_encoded has no columns after encoding, dropping 'Unit'")
+            data = data.drop(columns=['Unit'])
+        else:
+            if len(encoder.categories_[0]) > 1:
+                unit_df = pd.DataFrame(unit_encoded, columns=[f"Unit_{cat}" for cat in encoder.categories_[0][1:]])
+            else:
+                unit_df = pd.DataFrame(unit_encoded, columns=[f"Unit_{encoder.categories_[0][0]}"])
+
+            data = pd.concat([data, unit_df], axis=1)
+            data = data.drop(columns=['Unit'])
 
     cols = [target_col_name] + [col for col in data if col != target_col_name]
     data = data[cols]
@@ -71,12 +87,16 @@ def data_preparation(data, target_col_name, n_past=60):
         print(f"Warning: Non-numeric columns found: {non_numeric_cols}. These will be dropped.")
         data = data.drop(columns=non_numeric_cols)
 
+    if data.isnull().values.any() or np.isinf(data.values).any():
+        print(f"Warning: NaN or infinite values found in data for {data['Commodity'].iloc[0]}!")
+        # Consider handling or skipping this commodity...
+
     scaler = MinMaxScaler(feature_range=(0, 1))
     data_scaled = scaler.fit_transform(data)
     X, y = generate_sequences(data_scaled, n_past)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, shuffle=False)
-    return X_train, X_test, y_train, y_test, scaler, encoder  # Added encoder to the return statement
+    return X_train, X_test, y_train, y_test, scaler, encoder
 
 
 def plot_training_target_distribution(y_train, y_test):
@@ -106,7 +126,7 @@ def plot_average_price_sequence(X_train, feature_idx=0, num_sequences=5):
     plt.show()
 
 
-
+# Main function
 if __name__ == "__main__":
     file_path = "dataset.csv"
     data = load_data(file_path)
@@ -114,34 +134,37 @@ if __name__ == "__main__":
     max_visualizations = 5
     visualized_commodities = 0
 
-    # Ensure the models directory exists before trying to save into it
     if not os.path.exists('models'):
         os.makedirs('models')
 
     for commodity in data['Commodity'].unique():
+        if commodity == 'Maize':  # Skip all processing for Maize
+            print("Skipping all processing for Maize")
+            continue
+
         print(f"\nProcessing for: {commodity}")
         commodity_data = data[data['Commodity'] == commodity]
 
         X_train, X_test, y_train, y_test, scaler, encoder = data_preparation(
             commodity_data,
             target_col_name='Average',
-            n_past=60
+            n_past=60,
+            skip_feature_extraction_for=['Maize']
         )
 
-        # Save processed data
         save_data(pd.DataFrame(X_train.reshape(X_train.shape[0], -1)), f"{commodity}_X_train.csv")
         save_data(pd.DataFrame(X_test.reshape(X_test.shape[0], -1)), f"{commodity}_X_test.csv")
         save_data(pd.DataFrame(y_train), f"{commodity}_y_train.csv")
         save_data(pd.DataFrame(y_test), f"{commodity}_y_test.csv")
 
-        # Save the scaler and encoder objects for future use
-        # Ensure valid filename by replacing invalid characters
-        valid_filename_commodity = commodity.replace("(", "_").replace(")", "_").replace(" ", "_")
-        dump(scaler, f'models/{valid_filename_commodity}_scaler.gz', compress='gzip')
-        if encoder is not None:
-            dump(encoder, f'models/{valid_filename_commodity}_encoder.gz', compress='gzip')
+        if not os.path.exists('scalers_encoders'):
+            os.makedirs('scalers_encoders')
 
-        # Visualization
+        valid_filename_commodity = commodity.replace("(", "_").replace(")", "_").replace(" ", "_")
+        dump(scaler, f'scalers_encoders/{valid_filename_commodity}_scaler.gz', compress='gzip')
+        if encoder is not None:
+            dump(encoder, f'scalers_encoders/{valid_filename_commodity}_encoder.gz', compress='gzip')
+
         if visualized_commodities < max_visualizations:
             print(f"\nVisualizing for: {commodity}")
             plot_training_target_distribution(y_train, y_test)
@@ -150,7 +173,6 @@ if __name__ == "__main__":
         else:
             print(f"\nSkipping visualization for: {commodity}")
 
-        # Summary
         print(f"Summary for {commodity}:")
         print(f" - Training data: {X_train.shape[0]} sequences")
         print(f" - Test data: {X_test.shape[0]} sequences\n")
