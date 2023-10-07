@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from sklearn.model_selection import train_test_split
 from joblib import dump, load
+import time
 import warnings  # Import warnings module
 
 # Suppress specific warning
@@ -60,14 +61,13 @@ def data_preparation(data, target_col_name, n_past=60, skip_feature_extraction_f
     encoder = None
 
     if 'Unit' in data.columns:
-        encoder = OneHotEncoder(drop='first', sparse_output=True)  # Updated based on warning
-        unit_encoded = encoder.fit_transform(data[['Unit']]).toarray()  # Convert to dense array
+        encoder = OneHotEncoder(drop='first', sparse_output=True)
+        unit_encoded = encoder.fit_transform(data[['Unit']]).toarray()
 
-        # Debugging: Check the shape and type
         print(f"Shape of unit_encoded: {unit_encoded.shape}")
         print(f"Type of unit_encoded: {type(unit_encoded)}")
 
-        if unit_encoded.shape[1] == 0:  # Check if there are no columns
+        if unit_encoded.shape[1] == 0:
             print("Warning: unit_encoded has no columns after encoding, dropping 'Unit'")
             data = data.drop(columns=['Unit'])
         else:
@@ -89,11 +89,15 @@ def data_preparation(data, target_col_name, n_past=60, skip_feature_extraction_f
 
     if data.isnull().values.any() or np.isinf(data.values).any():
         print(f"Warning: NaN or infinite values found in data for {data['Commodity'].iloc[0]}!")
-        # Consider handling or skipping this commodity...
 
     scaler = MinMaxScaler(feature_range=(0, 1))
     data_scaled = scaler.fit_transform(data)
     X, y = generate_sequences(data_scaled, n_past)
+
+    # Check if sequences were generated, if not, return empty arrays and None objects
+    if X.size == 0 or y.size == 0:
+        print(f"No sequences generated. Skipping further processing...")
+        return np.array([]), np.array([]), np.array([]), np.array([]), None, None
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, shuffle=False)
     return X_train, X_test, y_train, y_test, scaler, encoder
@@ -128,19 +132,20 @@ def plot_average_price_sequence(X_train, feature_idx=0, num_sequences=5):
 
 # Main function
 if __name__ == "__main__":
+    start_time:time.time()
     file_path = "dataset.csv"
     data = load_data(file_path)
 
-    max_visualizations = 5
+    max_visualizations = 2
     visualized_commodities = 0
 
     if not os.path.exists('models'):
         os.makedirs('models')
 
     for commodity in data['Commodity'].unique():
-        if commodity == 'Maize':  # Skip all processing for Maize
-            print("Skipping all processing for Maize")
-            continue
+        # if commodity == 'Maize':  # Skip all processing for Maize
+        #     print("Skipping all processing for Maize")
+        #     continue
 
         print(f"\nProcessing for: {commodity}")
         commodity_data = data[data['Commodity'] == commodity]
@@ -151,6 +156,11 @@ if __name__ == "__main__":
             n_past=60,
             skip_feature_extraction_for=['Maize']
         )
+
+        # Check if generated sequences are empty
+        if X_train.size == 0 or X_test.size == 0:
+            print(f"No sequences generated for {commodity}. Skipping...")
+            continue
 
         save_data(pd.DataFrame(X_train.reshape(X_train.shape[0], -1)), f"{commodity}_X_train.csv")
         save_data(pd.DataFrame(X_test.reshape(X_test.shape[0], -1)), f"{commodity}_X_test.csv")
