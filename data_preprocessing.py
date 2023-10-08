@@ -1,4 +1,5 @@
 import os
+import re  # Added for regular expressions
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -48,8 +49,14 @@ def save_data(data, file_name, folder_name):
     data.to_csv(os.path.join(folder_name, file_name), index=False)
 
 
-def format_commodity_name(commodity):
-    return commodity.lower().replace(' ', '_')
+# Updated function
+def standardize_name(name):
+    """
+    Standardize commodity name by removing special characters.
+    """
+    cleaned_name = re.sub(r"[^\w\s]", '', name)  # Remove special characters
+    cleaned_name = cleaned_name.replace(" ", "_").lower()  # Replace spaces with underscores and make lowercase
+    return cleaned_name
 
 
 def data_preparation(data, target_col_name, n_past=60, skip_feature_extraction_for=None):
@@ -128,6 +135,8 @@ def plot_average_price_sequence(X_train, feature_idx=0, num_sequences=5):
     plt.legend()
     plt.show()
 
+
+# Updated 'main()' function
 def main():
     file_path = "dataset.csv"
     data = load_data(file_path)
@@ -143,11 +152,14 @@ def main():
         print(f"\nProcessing for: {commodity}")
         commodity_data = data[data['Commodity'] == commodity]
 
+        # Standardize file names
+        standardized_commodity_name = standardize_name(commodity)
+
         X_train, X_test, y_train, y_test, scaler, encoder = data_preparation(
             commodity_data,
             target_col_name='Maximum',  # Assume we are predicting the 'Maximum' price
             n_past=60,
-            skip_feature_extraction_for=['Maize']
+            skip_feature_extraction_for=['maize']  # Ensure skip names are also standardized
         )
 
         # Check if generated sequences are empty
@@ -155,19 +167,19 @@ def main():
             print(f"No sequences generated for {commodity}. Skipping...")
             continue
 
-        formatted_commodity_name = format_commodity_name(commodity)
-
-        save_data(pd.DataFrame(X_train.reshape(X_train.shape[0], -1)), f"{formatted_commodity_name}_X_train.csv",
-                  'processed_data')
-        save_data(pd.DataFrame(X_test.reshape(X_test.shape[0], -1)), f"{formatted_commodity_name}_X_test.csv",
-                  'processed_data')
-        save_data(pd.DataFrame(y_train), f"{formatted_commodity_name}_y_train.csv", 'processed_data')
-        save_data(pd.DataFrame(y_test), f"{formatted_commodity_name}_y_test.csv", 'processed_data')
+        save_data(pd.DataFrame(X_train.reshape(X_train.shape[0], -1)),
+                  f"{standardized_commodity_name}_X_train.csv", 'processed_data')
+        save_data(pd.DataFrame(X_test.reshape(X_test.shape[0], -1)),
+                  f"{standardized_commodity_name}_X_test.csv", 'processed_data')
+        save_data(pd.DataFrame(y_train),
+                  f"{standardized_commodity_name}_y_train.csv", 'processed_data')
+        save_data(pd.DataFrame(y_test),
+                  f"{standardized_commodity_name}_y_test.csv", 'processed_data')
 
         # Save models
-        dump(scaler, f'scalers_encoders/{formatted_commodity_name}_scaler.gz', compress='gzip')
+        dump(scaler, f'scalers_encoders/{standardized_commodity_name}_scaler.gz', compress='gzip')
         if encoder is not None:
-            dump(encoder, f'scalers_encoders/{formatted_commodity_name}_encoder.gz', compress='gzip')
+            dump(encoder, f'scalers_encoders/{standardized_commodity_name}_encoder.gz', compress='gzip')
 
         if visualized_commodities < max_visualizations:
             print(f"\nVisualizing for: {commodity}")
