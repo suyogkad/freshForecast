@@ -4,11 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from sklearn.model_selection import train_test_split
-from joblib import dump, load
-import time
-import warnings  # Import warnings module
+from joblib import dump
+import warnings
 
-# Suppress specific warning
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 
@@ -23,7 +21,6 @@ def generate_sequences(data, n_past=60):
         X.append(data[i - n_past:i, :])
         y.append(data[i, 0])
     return np.array(X), np.array(y)
-
 
 def extract_date_features(data):
     # Create a deep copy of the data to prevent SettingWithCopyWarning
@@ -45,11 +42,14 @@ def extract_date_features(data):
 
     return data_copy
 
+def save_data(data, file_name, folder_name):
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
+    data.to_csv(os.path.join(folder_name, file_name), index=False)
 
-def save_data(data, file_name):
-    if not os.path.exists('processed_data'):
-        os.makedirs('processed_data')
-    data.to_csv(os.path.join('processed_data', file_name), index=False)
+
+def format_commodity_name(commodity):
+    return commodity.lower().replace(' ', '_')
 
 
 def data_preparation(data, target_col_name, n_past=60, skip_feature_extraction_for=None):
@@ -102,7 +102,6 @@ def data_preparation(data, target_col_name, n_past=60, skip_feature_extraction_f
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, shuffle=False)
     return X_train, X_test, y_train, y_test, scaler, encoder
 
-
 def plot_training_target_distribution(y_train, y_test):
     if np.isnan(y_train).any() or np.isnan(y_test).any():
         print("Warning: NaN values found in the data. Removing them for visualization.")
@@ -129,30 +128,24 @@ def plot_average_price_sequence(X_train, feature_idx=0, num_sequences=5):
     plt.legend()
     plt.show()
 
-
-# Main function
-if __name__ == "__main__":
-    start_time:time.time()
+def main():
     file_path = "dataset.csv"
     data = load_data(file_path)
-
     max_visualizations = 2
     visualized_commodities = 0
 
-    if not os.path.exists('models'):
-        os.makedirs('models')
+    # Ensure output directories exist
+    for dir_name in ['models', 'processed_data', 'scalers_encoders']:
+        if not os.path.exists(dir_name):
+            os.makedirs(dir_name)
 
     for commodity in data['Commodity'].unique():
-        # if commodity == 'Maize':  # Skip all processing for Maize
-        #     print("Skipping all processing for Maize")
-        #     continue
-
         print(f"\nProcessing for: {commodity}")
         commodity_data = data[data['Commodity'] == commodity]
 
         X_train, X_test, y_train, y_test, scaler, encoder = data_preparation(
             commodity_data,
-            target_col_name='Average',
+            target_col_name='Maximum',  # Assume we are predicting the 'Maximum' price
             n_past=60,
             skip_feature_extraction_for=['Maize']
         )
@@ -162,18 +155,19 @@ if __name__ == "__main__":
             print(f"No sequences generated for {commodity}. Skipping...")
             continue
 
-        save_data(pd.DataFrame(X_train.reshape(X_train.shape[0], -1)), f"{commodity}_X_train.csv")
-        save_data(pd.DataFrame(X_test.reshape(X_test.shape[0], -1)), f"{commodity}_X_test.csv")
-        save_data(pd.DataFrame(y_train), f"{commodity}_y_train.csv")
-        save_data(pd.DataFrame(y_test), f"{commodity}_y_test.csv")
+        formatted_commodity_name = format_commodity_name(commodity)
 
-        if not os.path.exists('scalers_encoders'):
-            os.makedirs('scalers_encoders')
+        save_data(pd.DataFrame(X_train.reshape(X_train.shape[0], -1)), f"{formatted_commodity_name}_X_train.csv",
+                  'processed_data')
+        save_data(pd.DataFrame(X_test.reshape(X_test.shape[0], -1)), f"{formatted_commodity_name}_X_test.csv",
+                  'processed_data')
+        save_data(pd.DataFrame(y_train), f"{formatted_commodity_name}_y_train.csv", 'processed_data')
+        save_data(pd.DataFrame(y_test), f"{formatted_commodity_name}_y_test.csv", 'processed_data')
 
-        valid_filename_commodity = commodity.replace("(", "_").replace(")", "_").replace(" ", "_")
-        dump(scaler, f'scalers_encoders/{valid_filename_commodity}_scaler.gz', compress='gzip')
+        # Save models
+        dump(scaler, f'scalers_encoders/{formatted_commodity_name}_scaler.gz', compress='gzip')
         if encoder is not None:
-            dump(encoder, f'scalers_encoders/{valid_filename_commodity}_encoder.gz', compress='gzip')
+            dump(encoder, f'scalers_encoders/{formatted_commodity_name}_encoder.gz', compress='gzip')
 
         if visualized_commodities < max_visualizations:
             print(f"\nVisualizing for: {commodity}")
@@ -189,3 +183,5 @@ if __name__ == "__main__":
         print("-" * 30)
 
 
+if __name__ == "__main__":
+    main()
