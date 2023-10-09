@@ -1,79 +1,79 @@
-from flask import Flask, render_template, request
-from keras.models import load_model
 import numpy as np
-import pandas as pd
-import joblib
+from flask import Flask, render_template, request, redirect, url_for
 import os
+import pandas as pd
+import keras.models
+import pickle
+import gzip
+from datetime import datetime
 
 app = Flask(__name__)
 
-# Pre-load all models & scalers
-models = {}
-scalers = {}
-# Use absolute paths for your models and scalers
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Gets the absolute path to your script
-models_folder = os.path.join(BASE_DIR, 'models')
-scalers_folder = os.path.join(BASE_DIR, 'scalers_encoders')
-
-for model_file in os.listdir(models_folder):
-    model_filepath = os.path.join(models_folder, model_file)
-    if os.path.exists(model_filepath) and os.path.getsize(model_filepath) > 0:
-        # File exists and is not empty
-        print(f"Loading model: {model_filepath}")
-        model_name = model_file.replace('_model.h5', '')
-        models[model_name] = load_model(model_filepath)
-        scalers[model_name] = joblib.load(os.path.join(scalers_folder, model_name + '_scaler.gz'))
-    else:
-        # File doesn't exist or is empty
-        print(f"File: {model_filepath} doesn't exist or is empty")
+# Load dataset to get the vegetable names
+data = pd.read_csv('dataset.csv')
+vege_names = sorted(data['Commodity'].unique())
 
 
-# Load dataset
-dataset = pd.read_csv('dataset.csv')
+# Sanitize name function
+def sanitize_name(name):
+    return name.replace(" ", "").replace("(", "").replace(")", "").lower()
 
 
-@app.route('/')
-def home():
-    # Send unique Commodity names to the template
-    commodities = dataset['Commodity'].unique()
-    return render_template('index.html', commodities=commodities)
-
-
-@app.route('/predict', methods=['POST'])
-def predict():
+@app.route('/', methods=['GET', 'POST'])
+def index():
     if request.method == 'POST':
-        # Get data from form
-        commodity = request.form['commodity']
-        # ... other inputs
+        vege = request.form.get('vegetable')
+        date = request.form.get('date')
 
-        # Identify model & scaler name
-        model_name = commodity.lower().replace('(', '').replace(')', '').replace('/', '').replace(' ', '')
+        # Ensure the date selected is a future date
+        selected_date = datetime.strptime(date, '%Y-%m-%d')
+        if selected_date <= datetime.now():
+            error = "Please select a future date."
+            return render_template('index.html', vegetables=vege_names, error=error)
 
-        # Load appropriate model and scaler
-        model = models.get(model_name)
-        scaler = scalers.get(model_name)
+        return redirect(url_for('predict', vegetable=vege, date=date))
 
-        if model and scaler:
-            # Data preprocessing (scaling, reshaping, etc.)
-            # Make sure the input data shape/formats match with the ones during training
-
-            # Example: Dummy data for prediction
-            # input_data = np.array([some_preprocessed_data])
-            # input_data_reshaped = np.reshape(input_data, (input_data.shape[0], 1, input_data.shape[1]))
-
-            # Make prediction
-            prediction = model.predict(input_data_reshaped)
-
-            # Inverse scaling (if applied during training)
-            prediction_original_scale = scaler.inverse_transform(prediction)
-
-            return render_template('prediction.html', prediction=prediction_original_scale)
-        else:
-            error_msg = f"No model or scaler found for: {commodity}"
-            return render_template('index.html', error=error_msg, commodities=dataset['Commodity'].unique())
-
-    return render_template('index.html', commodities=dataset['Commodity'].unique())
+    return render_template('index.html', vegetables=vege_names, error=None)
 
 
-if __name__ == "__main__":
+@app.route('/predict/<vegetable>/<date>')
+def predict(vegetable, date):
+    sanitized_vege_name = sanitize_name(vegetable)
+
+    model_name = sanitized_vege_name + "_model.h5"
+    model = keras.models.load_model(os.path.join('models', model_name))
+
+    # File path for scalers and encoders
+    scaler_file_path = f'scalers_encoders/{sanitized_vege_name}_scaler.gz'
+    encoder_file_path = f'scalers_encoders/{sanitized_vege_name}_encoder.gz'
+
+    # Check if scaler and encoder files exist
+    assert os.path.exists(scaler_file_path), f"Scaler file does not exist at path: {scaler_file_path}"
+    assert os.path.exists(encoder_file_path), f"Encoder file does not exist at path: {encoder_file_path}"
+
+    # Load scaler and encoder
+    with gzip.open(scaler_file_path, 'rb') as f:
+        scaler = pickle.load(f)
+
+    with gzip.open(encoder_file_path, 'rb') as f:
+        encoder = pickle.load(f)
+
+    # Find the index (encoded value) of the provided date-string
+    transformed_date = np.where(encoder == date)[0]
+
+    # Ensure a match was found
+    if transformed_date.size == 0:
+        raise ValueError(f"No encoding found for date: {date}")
+
+    # Convert to 2D array as model input
+    transformed_date = transformed_date.reshape(1, -1)
+
+    # Predict
+    prediction = model.predict(scaler.transform(transformed_date))
+    min_price, max_price = prediction[0]
+
+    return render_template('results.html', vegetable=vegetable, date=date, min_price=min_price, max_price=max_price)
+
+
+if __name__ == '__main__':
     app.run(debug=True)

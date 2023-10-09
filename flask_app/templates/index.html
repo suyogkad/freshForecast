@@ -2,24 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Vegetable Price Prediction</title>
 </head>
 <body>
-
-    <!-- ... -->
-<form action="/predict" method="POST">
-    <label for="commodity">Select Commodity:</label>
-    <select name="commodity" id="commodity">
-        {% for com in commodities %}
-            <option value="{{ com }}">{{ com }}</option>
-        {% endfor %}
-    </select>
-    <!-- Other input fields... -->
-    <button type="submit">Predict</button>
-</form>
-<!-- ... -->
-
-    
+    <h1>Vegetable Price Prediction</h1>
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+    <form method="POST" action="/">
+        <label for="vegetable">Select Vegetable: </label>
+        <select name="vegetable" id="vegetable" required>
+            {% for v in vegetables %}
+                <option value="{{ v }}">{{ v }}</option>
+            {% endfor %}
+        </select>
+        <br><br>
+        <label for="date">Select Date: </label>
+        <input type="date" name="date" id="date" min="2023-10-10" required>
+        <br><br>
+        <button type="submit">Predict</button>
+    </form>
 </body>
 </html>
