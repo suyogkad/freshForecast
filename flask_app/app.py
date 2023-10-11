@@ -24,7 +24,7 @@ EXPECTED_FEATURE_COUNT = scaler_X.n_features_in_
 def dashboard():
     return render_template("dashboard.html")
 
-@app.route("/predict_page")
+@app.route("/predict_page", methods=['GET', 'POST'])
 def predict_page():
     return render_template("index.html", commodities=commodity_names)
 
@@ -59,7 +59,7 @@ def search_commodity():
     return jsonify(search_results)
 
 
-@app.route("/predict", methods=["POST"])
+@app.route("/predict", methods=['GET', 'POST'])
 def predict():
     if request.method == "POST":
         # Get the data from the form
