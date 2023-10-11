@@ -68,6 +68,9 @@ def data_preparation(data, target_col_name, n_past=60, skip_feature_extraction_f
     encoder = None
 
     if 'Unit' in data.columns:
+        print("Unique values in 'Unit' before encoding:")
+        print(data['Unit'].unique())  # Modified line here
+
         encoder = OneHotEncoder(drop='first', sparse_output=True)
         unit_encoded = encoder.fit_transform(data[['Unit']]).toarray()
 

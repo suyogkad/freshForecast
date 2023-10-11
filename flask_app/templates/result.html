@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png">
+
+    <title>Prediction Result</title>
+</head>
+<body>
+    <h1>Prediction Results</h1>
+    <p>Minimum Price: {{ result.min_price }}</p>
+    <p>Maximum Price: {{ result.max_price }}</p>
+    <br>
+    <a href="/">Go back</a>
+</body>
+</html>

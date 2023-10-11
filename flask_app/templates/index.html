@@ -2,25 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vegetable Price Prediction</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png">
+
+    <title>Commodity Price Prediction</title>
+    <script>
+        // Set the minimum selectable date to today's date
+        document.addEventListener("DOMContentLoaded", function() {
+            var today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').setAttribute('min', today);
+        });
+    </script>
 </head>
 <body>
-    <h1>Vegetable Price Prediction</h1>
-    {% if error %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
-    <form method="POST" action="/">
-        <label for="vegetable">Select Vegetable: </label>
-        <select name="vegetable" id="vegetable" required>
-            {% for v in vegetables %}
-                <option value="{{ v }}">{{ v }}</option>
+    <h1>Commodity Price Prediction</h1>
+    <form method="POST" action="/predict">
+        <label for="date">Select Date:</label>
+        <input type="date" id="date" name="date" required><br><br>
+
+        <label for="commodity">Select Commodity:</label>
+        <select id="commodity" name="commodity" required>
+            {% for commodity in commodities %}
+                <option value="{{ commodity }}">{{ commodity }}</option>
             {% endfor %}
-        </select>
-        <br><br>
-        <label for="date">Select Date: </label>
-        <input type="date" name="date" id="date" min="2023-10-10" required>
-        <br><br>
-        <button type="submit">Predict</button>
+        </select><br><br>
+
+        <input type="submit" value="Predict">
     </form>
 </body>
 </html>

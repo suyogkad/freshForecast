@@ -1,0 +1,62 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+}
+
+h1 {
+    font-size: 28px;
+    color: #495057;
+}
+
+.logo {
+    width: 100px;
+}
+
+.bg-light {
+    background-color: #f8f9fa !important;
+    border-bottom: 1px solid #dee2e6;
+    box-shadow: 0px 4px 6px -1px rgba(0,0,0,0.1);
+}
+
+p.text-muted {
+    color: #6c757d;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.form-select {
+    width: auto;
+}
+
+/* CSS */
+.chart-container {
+    position: relative;
+    margin: 20px 0;
+}
+
+.zoom-buttons {
+    position: absolute;
+    top: -14px;
+    right: 10px;
+    z-index: 10;
+}
+
+.zoom-btn {
+    background-color: white;
+    color: black;
+    border: none;
+    margin-left: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.zoom-btn:hover {
+    box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2);
+}
