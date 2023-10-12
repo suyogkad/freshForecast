@@ -1,0 +1,59 @@
+body.bg-custom {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f8f8;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    color: #333;
+    font-size: 24px;
+}
+
+.container {
+    max-width: 500px;
+}
+
+.logo {
+    width: 120px;
+}
+
+.predict-card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+p.text-muted {
+    color: #6c757d !important;
+    font-size: 0.9rem;
+}
+
+.btn {
+    width: 120px;
+}
+
+a.btn-light {
+    color: #000;
+    border-color: #000;
+}
+
+a.btn-light:hover {
+    color: #fff;
+    background-color: #000;
+}
+
+@media (max-width: 768px) {
+    p {
+        font-size: 14px;
+    }
+
+    .btn {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+}

@@ -3,15 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='results.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap">
     <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png">
-
     <title>Prediction Result</title>
 </head>
 <body>
-    <h1>Prediction Results</h1>
-    <p>Minimum Price: {{ result.min_price }}</p>
-    <p>Maximum Price: {{ result.max_price }}</p>
-    <br>
-    <a href="/">Go back</a>
+    <div class="container">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+        <h1>FreshForecast</h1>
+        <p class="prediction-statement">In {{ date }}, the price of {{ commodity_name }} will likely be around:</p>
+        <div class="price-box">
+            <p id="minPrice"><strong>Minimum Price:</strong> Nrs. {{ result.min_price }}</p>
+            <p id="maxPrice"><strong>Maximum Price:</strong> Nrs. {{ result.max_price }}</p>
+        </div>
+        <a href="/" class="btn-back">Go back</a>
+        <p class="data-statement">FreshForecast Model was trained on data from 2013 to 2021 only.</p>
+    </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let minPriceElem = document.getElementById('minPrice');
+        let maxPriceElem = document.getElementById('maxPrice');
+
+        let minPrice = parseFloat(minPriceElem.textContent.split('Nrs. ')[1]);
+        let maxPrice = parseFloat(maxPriceElem.textContent.split('Nrs. ')[1]);
+
+        minPrice = Math.abs(minPrice) / 1000;
+        maxPrice = Math.abs(maxPrice) / 1000;
+
+        minPriceElem.innerHTML = "<strong>Minimum Price:</strong> Nrs. " + minPrice.toFixed(2);
+        maxPriceElem.innerHTML = "<strong>Maximum Price:</strong> Nrs. " + maxPrice.toFixed(2);
+    });
+</script>
 </body>
 </html>

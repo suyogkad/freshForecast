@@ -109,7 +109,8 @@ def predict():
             'max_price': prediction_original[1]
         }
 
-        return render_template("result.html", result=result)
+        # Send additional data to the template
+        return render_template("result.html", result=result, commodity_name=commodity, date=date)
     else:
         return "Error: Method not allowed"
 

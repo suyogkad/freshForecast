@@ -3,31 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='predict.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png">
-
-    <title>Commodity Price Prediction</title>
-    <script>
-        // Set the minimum selectable date to today's date
-        document.addEventListener("DOMContentLoaded", function() {
-            var today = new Date().toISOString().split('T')[0];
-            document.getElementById('date').setAttribute('min', today);
-        });
-    </script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap">
+    <title>Price Prediction - FreshForecast</title>
 </head>
-<body>
-    <h1>Commodity Price Prediction</h1>
-    <form method="POST" action="/predict">
-        <label for="date">Select Date:</label>
-        <input type="date" id="date" name="date" required><br><br>
+<body class="bg-custom">
+    <div class="container text-center p-5">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo mb-4">
+        <h1>FreshForecast</h1>
+        <p class="text-muted mb-4">Predicting the prices for a sustainable tomorrow</p>
 
-        <label for="commodity">Select Commodity:</label>
-        <select id="commodity" name="commodity" required>
-            {% for commodity in commodities %}
-                <option value="{{ commodity }}">{{ commodity }}</option>
-            {% endfor %}
-        </select><br><br>
+        <form method="POST" action="{{ url_for('predict') }}" class="predict-card mx-auto bg-light p-4 rounded shadow-sm" style="max-width: 400px;" novalidate>
+            <div class="mb-3">
+                <label for="commodity" class="form-label">Select Commodity:</label>
+                <select id="commodity" name="commodity" class="form-select">
+                    {% for commodity in commodities %}
+                        <option value="{{ commodity }}">{{ commodity }}</option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">Commodity is required.</div>
+            </div>
 
-        <input type="submit" value="Predict">
-    </form>
+            <div class="mb-3">
+                <label for="date" class="form-label">Select Date:</label>
+                <input type="text" id="date" name="date" class="form-control" placeholder="Choose a date...">
+                <div class="invalid-feedback">Date is required.</div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="/" class="btn btn-light">Go Back</a>
+                <input type="submit" value="Predict" class="btn btn-success">
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+    flatpickr("#date", {
+        minDate: "today",
+        dateFormat: "Y-m-d",
+        disableMobile: "true",
+        showDisabled: true,
+    });
+});
+
+document.querySelector("form").addEventListener("submit", function(event) {
+    const dateInput = document.querySelector("#date");
+    const commodityInput = document.querySelector("#commodity");
+    let isValid = true;
+
+    if (!dateInput.value) {
+        isValid = false;
+        dateInput.classList.add("is-invalid");
+    } else {
+        dateInput.classList.remove("is-invalid");
+    }
+
+    if (!commodityInput.value) {
+        isValid = false;
+        commodityInput.classList.add("is-invalid");
+    } else {
+        commodityInput.classList.remove("is-invalid");
+    }
+
+    if (!isValid) {
+        event.preventDefault();
+    }
+});
+
+document.querySelector("#date").addEventListener("change", function() {
+    if (this.value) {
+        this.classList.remove("is-invalid");
+    }
+});
+
+document.querySelector("#commodity").addEventListener("change", function() {
+    if (this.value) {
+        this.classList.remove("is-invalid");
+    }
+});
+    </script>
 </body>
 </html>
