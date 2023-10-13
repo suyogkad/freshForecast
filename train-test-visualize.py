@@ -53,5 +53,5 @@ for prefix in unique_prefixes:
 
     except Exception as e:
         print(f"An error occurred: {str(e)}. Skipping {prefix} and moving to the next prefix.")
-        continue  # Continue to the next prefix if any other error occurs
+        continue
 

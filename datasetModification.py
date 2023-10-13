@@ -1,6 +1,6 @@
 import pandas as pd
 
-# Load your data
+# Load data
 df = pd.read_csv('dataset.csv')
 
 # Delete rows where 'Maize' appears anywhere

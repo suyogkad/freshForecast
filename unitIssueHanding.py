@@ -112,5 +112,3 @@ for commodity in commodities:
         continue
 
     plot_training_target_distribution(y_train)
-
-    # Additional steps for model training, evaluation, etc.

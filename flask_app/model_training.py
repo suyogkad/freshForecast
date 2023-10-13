@@ -18,7 +18,7 @@ def create_dir(dir_name):
 dataset_dir = 'flask_app'
 saved_data_dir = 'saved_data'
 
-create_dir(saved_data_dir)  # Ensure the directory for saved data exists
+create_dir(saved_data_dir)
 
 # Data Preprocessing
 

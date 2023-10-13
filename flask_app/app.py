@@ -28,10 +28,6 @@ def dashboard():
 def predict_page():
     return render_template("index.html", commodities=commodity_names)
 
-# @app.route("/analyze")
-# def analyze():
-#     return render_template("analyze.html")
-
 @app.route('/api/commodities')
 def get_commodities():
     df = pd.read_csv(r'C:\Users\suyog\PycharmProjects\pythonProject3\flask_app\dataset.csv')

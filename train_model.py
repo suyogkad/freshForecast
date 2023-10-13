@@ -5,7 +5,7 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from data_preprocessing import data_preparation, load_data  # assuming data_preprocessing.py is in the same directory
+from data_preprocessing import data_preparation, load_data
 import os
 
 # Set random seeds for reproducibility

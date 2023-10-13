@@ -146,7 +146,6 @@ def main():
     max_visualizations = 2
     visualized_commodities = 0
 
-    # Ensure output directories exist
     for dir_name in ['models', 'processed_data', 'scalers_encoders']:
         if not os.path.exists(dir_name):
             os.makedirs(dir_name)
@@ -160,9 +159,9 @@ def main():
 
         X_train, X_test, y_train, y_test, scaler, encoder = data_preparation(
             commodity_data,
-            target_col_name='Maximum',  # Assume we are predicting the 'Maximum' price
+            target_col_name='Maximum',
             n_past=60,
-            skip_feature_extraction_for=['maize']  # Ensure skip names are also standardized
+            skip_feature_extraction_for=['maize']
         )
 
         # Check if generated sequences are empty

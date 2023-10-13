@@ -4,14 +4,14 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler  # Import StandardScaler
 import joblib
 
-# Load your dataset
+# Load dataset
 data = pd.read_csv('dataset.csv')
 
-# Define the columns you want to scale for X and Y data
-x_columns_to_scale = ['Minimum', 'Maximum']  # Replace with your actual X columns (e.g., price-related columns)
-y_columns_to_scale = ['Minimum', 'Maximum']  # Replace with your actual Y columns (e.g., price-related columns)
+# Define the columnst to scale for X and Y data
+x_columns_to_scale = ['Minimum', 'Maximum']
+y_columns_to_scale = ['Minimum', 'Maximum']
 
-# Select columns that exist in your dataset for scaling
+# Select columns that exist in dataset for scaling
 x_columns_to_scale = [col for col in x_columns_to_scale if col in data.columns]
 y_columns_to_scale = [col for col in y_columns_to_scale if col in data.columns]
 
@@ -19,11 +19,11 @@ y_columns_to_scale = [col for col in y_columns_to_scale if col in data.columns]
 scaler_x = StandardScaler()
 scaler_y = StandardScaler()
 
-# Fit the scalers only on the selected columns in your dataset
+# Fit the scalers only on the selected columns in dataset
 scaler_x.fit(data[x_columns_to_scale])
 scaler_y.fit(data[y_columns_to_scale])
 
-# Apply the scalers to your data for X and Y data
+# Apply the scalers to data for X and Y data
 data_scaled_x = scaler_x.transform(data[x_columns_to_scale]) if x_columns_to_scale else data
 data_scaled_y = scaler_y.transform(data[y_columns_to_scale]) if y_columns_to_scale else data
 
